@@ -3,6 +3,17 @@ const { v4: uuidv4 } = require('uuid');
 const rooms = {};
 const onlineUsers = {};
 
+//mysql 
+const {createPool} = require('mysql');
+
+const pool = createPool({
+    host: "162.214.97.39", //localhost 
+    user: "jkmpg7ol_sistemas",
+    password: "5R3U6vvQWI0a",
+    database: "jkmpg7ol_compras",
+    connectionLimit: 10
+});
+
 exports.handleConnection = (socket) => {
     onlineUsers[socket.id] = {};
 }
@@ -34,7 +45,7 @@ exports.handleLeaveRoom = (socket) => {
 }
 
 exports.handleSendMessage = (io, data, socket_id = null) => {
-    const { text, roomID, userName } = data;
+    const { text, roomID, userName, userid } = data;
 
     const formatMessage = {
         id: uuidv4(),
@@ -44,7 +55,12 @@ exports.handleSendMessage = (io, data, socket_id = null) => {
         room: roomID,
         time: Date.now()
     }
-    
+
+    pool.query("insert into Actmensajes (mensaje, dptoid, userid) values ('"+text+"', '"+roomID+"', '"+userid+"');", (err, res) => {
+        return console.log(res);
+    });
+
+    //save data to mysql 
     io.to(roomID).emit('receive-message', formatMessage);
 }
 
@@ -96,7 +112,7 @@ const removeParticipantFromLists = (socket, roomID) => {
 
 const announceUserAction = (socket, roomID, action) => {
     const userName = rooms[roomID].participants[socket.id].userName;
-    const text =  `${ userName } has ${ action } the chat`;
+    const text =  `${ userName } se unió al chat`;
     
     this.handleSendMessage(socket, { text, roomID });
 }
