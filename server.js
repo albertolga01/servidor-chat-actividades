@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
 const express = require("express");
-const { Server } = require("socket.io");
+const { Server } = require("socket.io")("https://actividades.grupopetromar.com");
 const { handleSendMessage, handleJoinRoom, handleLeaveRoom, handleDisconnect, handleConnection} = require("./custom-event-handlers.js");
 
 dotenv.config();
